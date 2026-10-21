@@ -1,0 +1,58 @@
+{
+  "gitleaks": [
+    {
+      "RuleID": "generic-api-key",
+      "Description": "Detected candidate API Key or Token",
+      "File": "backend/app/quotes/service.py",
+      "StartLine": 5,
+      "Secret": "MOCK_DUMMY_TOKEN_SYNTHETIC_TEST_ONLY_123456789"
+    }
+  ],
+  "semgrep": {
+    "results": [
+      {
+        "check_id": "python.security.authorization.missing-ownership-check",
+        "path": "backend/app/quotes/service.py",
+        "start": { "line": 14 },
+        "extra": {
+          "severity": "ERROR",
+          "message": "Quote state is mutated without verifying that current user matches request.buyer_id.",
+          "fix": "Add 'if quote.buyer_id != current_user.id: raise ForbiddenException()'"
+        }
+      }
+    ]
+  },
+  "osv": {
+    "results": [
+      {
+        "source": { "path": "backend/requirements.txt" },
+        "packages": [
+          {
+            "package": {
+              "name": "cryptography",
+              "version": "3.4.6"
+            },
+            "vulnerabilities": [
+              {
+                "id": "GHSA-x4qr-2fvf-3mr5",
+                "summary": "Vulnerable OpenSSL padding oracle in legacy cryptography release",
+                "database_specific": {
+                  "severity": "high"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "linters": [
+    {
+      "tool": "ruff",
+      "code": "F401",
+      "filename": "backend/app/quotes/service.py",
+      "line": 2,
+      "message": "'sys' imported but unused"
+    }
+  ]
+}

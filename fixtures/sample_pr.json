@@ -1,0 +1,7 @@
+{
+  "pr_id": "SYNTHETIC-PR-104",
+  "title": "Add quote acceptance validation",
+  "commit_sha": "mockcommit-104-a1b2c3",
+  "changed_files": ["backend/app/quotes/service.py", "backend/tests/test_quotes.py", "mobile/src/features/quotes/AcceptQuoteButton.tsx"],
+  "diff_excerpt": "def accept_quote(quote_id):\\n    # TODO: add authorization before accepting quote\\n    return service.accept(quote_id)\\n"
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "organization": "AuctionNow",
+  "description": "Deterministic branch promotion and gate governance policies for AuctionNow SDLC",
+  "branches": {
+    "dev": {
+      "display_name": "Development / Feature Branches",
+      "target_patterns": ["dev", "feature/*", "bugfix/*"],
+      "allowed_critical_findings": 0,
+      "allowed_high_findings": 0,
+      "require_ci_tests": true,
+      "required_approval_roles": [
+        "tech_lead",
+        "developer"
+      ],
+      "stage_apk_build_triggered": false,
+      "manual_qa_signoff_required": false,
+      "advisory_handling": "warn",
+      "description": "Rapid development. Blocks on deterministic security & SAST flaws. Developer verifies test proposals."
+    },
+    "stage": {
+      "display_name": "Staging / Pre-Release Integration",
+      "target_patterns": ["stage", "staging", "release/*"],
+      "allowed_critical_findings": 0,
+      "allowed_high_findings": 0,
+      "require_ci_tests": true,
+      "required_approval_roles": [
+        "tech_lead",
+        "developer",
+        "qa_lead"
+      ],
+      "stage_apk_build_triggered": true,
+      "manual_qa_signoff_required": true,
+      "advisory_handling": "block_on_unacknowledged",
+      "description": "Integration gating. Merges trigger the internal Stage APK build. QA Lead approves the manual test execution matrix."
+    },
+    "prod": {
+      "display_name": "Production / Main",
+      "target_patterns": ["main", "prod", "production"],
+      "allowed_critical_findings": 0,
+      "allowed_high_findings": 0,
+      "require_ci_tests": true,
+      "required_approval_roles": [
+        "tech_lead",
+        "developer",
+        "qa_lead",
+        "release_manager"
+      ],
+      "stage_apk_build_triggered": false,
+      "manual_qa_signoff_required": true,
+      "advisory_handling": "block_on_any",
+      "description": "Production release gate. Requires 100% test pass rate, verified QA execution on Stage APK, and Release Manager authorization."
+    }
+  }
+}

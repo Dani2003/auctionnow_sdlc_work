@@ -1,0 +1,41 @@
+{
+  "automated_test_results": {
+    "commit_sha": "mockcommit-104-a1b2c3",
+    "total_tests": 14,
+    "passed": 14,
+    "failed": 0,
+    "tests": {
+      "TC-POS-001": {
+        "test_name": "test_buyer_can_accept_own_quote",
+        "test_file": "backend/tests/test_quotes.py",
+        "status": "PASSED",
+        "commit_sha": "mockcommit-104-a1b2c3",
+        "duration_ms": 12
+      },
+      "TC-AUTH-002": {
+        "test_name": "test_cross_buyer_quote_acceptance_forbidden",
+        "test_file": "backend/tests/test_quotes.py",
+        "status": "PASSED",
+        "commit_sha": "mockcommit-104-a1b2c3",
+        "duration_ms": 9
+      },
+      "TC-NEG-003": {
+        "test_name": "test_expired_quote_returns_conflict_error",
+        "test_file": "backend/tests/test_quotes.py",
+        "status": "PASSED",
+        "commit_sha": "mockcommit-104-a1b2c3",
+        "duration_ms": 8
+      }
+    }
+  },
+  "release_evidence": {
+    "pr_id": "SYNTHETIC-PR-104",
+    "commit_sha": "mockcommit-104-a1b2c3",
+    "evidence_commit_sha": "mockcommit-104-a1b2c3",
+    "ci_passed": true,
+    "qa_signed_off": true,
+    "unresolved_high_findings": false,
+    "advisory_warnings_count": 1,
+    "test_suite_coverage_pct": 91.5
+  }
+}

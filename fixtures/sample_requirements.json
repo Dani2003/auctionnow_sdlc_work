@@ -1,0 +1,9 @@
+{
+  "feature": "Accept a seller quote",
+  "acceptance_criteria": [
+    "A buyer can accept a quote belonging to their own request",
+    "A buyer cannot accept a quote belonging to another buyer's request",
+    "A quote that is no longer available returns a clear error",
+    "The UI prevents duplicate submissions while processing"
+  ]
+}
