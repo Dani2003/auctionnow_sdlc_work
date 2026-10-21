@@ -1,0 +1,13 @@
+{
+  "pr_id": "SYNTHETIC-PR-105",
+  "title": "feat(quotes): hardened quote acceptance with auth boundary and debounced mobile UI",
+  "author": "senior_dev_verified",
+  "target_branch": "stage",
+  "commit_sha": "mockcommit-105-clean-remediated",
+  "changed_files": [
+    "backend/app/quotes/service.py",
+    "mobile/src/features/quotes/AcceptQuoteButton.tsx"
+  ],
+  "diff_text": "diff --git a/backend/app/quotes/service.py b/backend/app/quotes/service.py\n@@ -1,15 +1,24 @@\n+import os\n+from app.auth import get_current_user, require_ownership\n+\n+PAYMENT_GATEWAY_API_KEY = os.environ.get(\"PAYMENT_GATEWAY_SECRET\")\n+\n+@require_ownership\n+def accept_quote(quote_id: str, current_user = Depends(get_current_user)):\n+    quote = db.get_quote(quote_id)\n+    if quote.buyer_id != current_user.id:\n+        raise PermissionDeniedError(\"Cross-buyer quote acceptance forbidden\")\n+    return process_payment(quote, secret=PAYMENT_GATEWAY_API_KEY)\n",
+  "description": "Remediated quote acceptance: secrets loaded from env, strict tenant isolation enforced, UI debounce prevents duplicate payments."
+}

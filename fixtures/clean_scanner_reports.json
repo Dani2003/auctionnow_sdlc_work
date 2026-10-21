@@ -1,0 +1,10 @@
+{
+  "gitleaks": [],
+  "semgrep": {
+    "results": []
+  },
+  "osv": {
+    "results": []
+  },
+  "linters": []
+}

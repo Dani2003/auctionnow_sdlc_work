@@ -1,0 +1,19 @@
+{
+  "pr_id": "SYNTHETIC-PR-105",
+  "commit_sha": "mockcommit-105-clean-remediated",
+  "automated_test_results": {
+    "test_suite": "AuctionNow Backend & Mobile Integration",
+    "commit_sha": "mockcommit-105-clean-remediated",
+    "total": 34,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 12.4,
+    "timestamp_utc": "2026-10-21T12:00:00Z"
+  },
+  "build_status": {
+    "backend_image": "SUCCESS",
+    "stage_apk_build": "SUCCESS",
+    "stage_apk_version": "v2.1.0-stage-105"
+  }
+}

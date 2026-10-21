@@ -1,0 +1,14 @@
+{
+  "pr_id": "SYNTHETIC-PR-104",
+  "title": "feat(quotes): auto-accept quote logic and payment dispatch",
+  "author": "junior_dev_unvetted",
+  "target_branch": "dev",
+  "commit_sha": "mockcommit-104-a1b2c3",
+  "changed_files": [
+    "backend/app/quotes/service.py",
+    "backend/requirements.txt",
+    "mobile/src/features/quotes/AcceptQuoteButton.tsx"
+  ],
+  "diff_text": "diff --git a/backend/app/quotes/service.py b/backend/app/quotes/service.py\n@@ -2,12 +2,16 @@\n+PAYMENT_GATEWAY_API_KEY = \"AKIAIOSFODNN7EXAMPLE99\"\n+\n def accept_quote(quote_id: str, buyer_id: str):\n-    # TODO: add permission check\n-    quote = get_quote(quote_id)\n-    return process_payment(quote)\n+    quote = db.get_quote(quote_id)\n+    # Missing buyer ownership check (IDOR vulnerability)\n+    return process_payment(quote, api_key=PAYMENT_GATEWAY_API_KEY)\n",
+  "description": "Quick implementation of quote acceptance. Unreviewed, tested locally."
+}
