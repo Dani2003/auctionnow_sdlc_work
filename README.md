@@ -39,10 +39,10 @@ The prototype implements a sequential, lazy-execution pipeline where each stage 
 
 | Stage | Agent Name | Assigned HITL Persona | Key Responsibilities |
 | :--- | :--- | :--- | :--- |
-| **Stage 1** | **Engineering Quality & Security Reviewer** | **Sarah Chen (Tech Lead)** | Ingests deterministic scanner outputs (Gitleaks, Semgrep, OSV, Linters) alongside contextual advisory findings. Differentiates tool-confirmed vulnerabilities from LLM recommendations. Masks secrets. |
-| **Stage 2** | **SDET Test Planner** | **Alex Rivera (Senior Dev)** | Generates structured test proposals categorized across positive, negative, boundary, authorization (IDOR), failure, and platform (mobile UI debounce) dimensions. Formulates clarification requests for missing business rules. All proposals have status `proposed_not_executed`. |
-| **Stage 3** | **QA Director** | **Priya Patel (QA Lead)** | Creates a risk-based manual test matrix. Cross-references actual passing automated test execution reports. Prohibits marking scenarios covered without verified passing test reports matching the candidate commit. |
-| **Stage 4** | **Release & CI Evidence Summarizer** | **David Kim (Release Manager)** | Evaluates all evidence (CI builds, automated tests, scanner reports, QA sign-off, and the complete HITL approval chain). Emits `PASS`, `BLOCKED`, or `NEEDS_HUMAN_REVIEW`. Never merges or deploys code. |
+| **Stage 1** | **Engineering Quality & Security Reviewer** | **Shahbaz / Saif (Tech Lead)** | Ingests deterministic scanner outputs (Gitleaks, Semgrep, OSV, Linters) alongside contextual advisory findings. Differentiates tool-confirmed vulnerabilities from LLM recommendations. Masks secrets. |
+| **Stage 2** | **SDET Test Planner** | **Shaheb / Tooba (Senior Dev)** | Generates structured test proposals categorized across positive, negative, boundary, authorization (IDOR), failure, and platform (mobile UI debounce) dimensions. Formulates clarification requests for missing business rules. All proposals have status `proposed_not_executed`. |
+| **Stage 3** | **QA Director** | **Siaira / Tabbasum (QA Lead)** | Creates a risk-based manual test matrix. Cross-references actual passing automated test execution reports. Prohibits marking scenarios covered without verified passing test reports matching the candidate commit. |
+| **Stage 4** | **Release & CI Evidence Summarizer** | **Hassan / Shahbaz (Release Manager)** | Evaluates all evidence (CI builds, automated tests, scanner reports, QA sign-off, and the complete HITL approval chain). Emits `PASS`, `BLOCKED`, or `NEEDS_HUMAN_REVIEW`. Never merges or deploys code. |
 
 ---
 

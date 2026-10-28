@@ -139,10 +139,10 @@ def generate_step_summary_md(
     ]
 
     role_map = {
-        "agent_1_review": ("Tech Lead", "Sarah Chen"),
-        "agent_2_test_plan": ("Senior Dev", "Alex Rivera"),
-        "agent_3_qa_plan": ("QA Lead", "Priya Patel"),
-        "agent_4_release_summary": ("Release Manager", "David Kim"),
+        "agent_1_review": ("Tech Lead", "Shahbaz / Saif"),
+        "agent_2_test_plan": ("Senior Dev", "Shaheb / Tooba"),
+        "agent_3_qa_plan": ("QA Lead", "Siaira / Tabbasum"),
+        "agent_4_release_summary": ("Release Manager", "Hassan / Shahbaz"),
     }
 
     stages_to_render = report.get("stages") or [

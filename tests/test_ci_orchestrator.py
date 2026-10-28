@@ -122,7 +122,7 @@ class TestBranchGovernancePolicy(unittest.TestCase):
         tl_approvals = [a for a in result["approvals"] if a["role"] == "tech_lead"]
         self.assertEqual(len(tl_approvals), 1)
         self.assertEqual(tl_approvals[0]["decision"], "reject")
-        self.assertIn("Sarah Chen", tl_approvals[0]["approver_name"])
+        self.assertIn("Shahbaz / Saif", tl_approvals[0]["approver_name"])
 
     def test_dev_branch_approves_when_clean(self):
         result = evaluate_branch_compliance(
@@ -157,7 +157,7 @@ class TestBranchGovernancePolicy(unittest.TestCase):
         qa_approvals = [a for a in result["approvals"] if a["role"] == "qa_lead"]
         self.assertEqual(len(qa_approvals), 1)
         self.assertEqual(qa_approvals[0]["decision"], "approve")
-        self.assertIn("Priya Patel", qa_approvals[0]["approver_name"])
+        self.assertIn("Siaira / Tabbasum", qa_approvals[0]["approver_name"])
 
     def test_prod_branch_requires_release_manager_signoff(self):
         result = evaluate_branch_compliance(
@@ -174,7 +174,7 @@ class TestBranchGovernancePolicy(unittest.TestCase):
         rm_approvals = [a for a in result["approvals"] if a["role"] == "release_manager"]
         self.assertEqual(len(rm_approvals), 1)
         self.assertEqual(rm_approvals[0]["decision"], "approve")
-        self.assertIn("David Kim", rm_approvals[0]["approver_name"])
+        self.assertIn("Hassan / Shahbaz", rm_approvals[0]["approver_name"])
 
     def test_missing_or_failing_ci_tests_blocks_promotion(self):
         # Missing CI tests
@@ -229,7 +229,7 @@ class TestCiOrchestratorExecution(unittest.TestCase):
             # Validate generated summary markdown
             summary_text = out_summary.read_text(encoding="utf-8")
             self.assertIn("BLOCKED", summary_text)
-            self.assertIn("Sarah Chen", summary_text)
+            self.assertIn("Shahbaz / Saif", summary_text)
             self.assertIn("DET-GITLEAKS-001", summary_text)
 
     def test_step_summary_md_structure(self):
@@ -262,14 +262,14 @@ class TestCiOrchestratorExecution(unittest.TestCase):
                     "stage": "agent_1_review",
                     "decision": "approve",
                     "role": "tech_lead",
-                    "approver_name": "Sarah Chen",
+                    "approver_name": "Shahbaz / Saif",
                     "artifact_sha256": "abcdef1234567890abcdef"
                 }
             ]
         }
         md = generate_step_summary_md(report, stage1, stage2, stage3, stage4, target_branch="dev")
         self.assertIn("# ✅ AuctionNow SDLC Quality & Governance Report", md)
-        self.assertIn("Sarah Chen", md)
+        self.assertIn("Shahbaz / Saif", md)
         self.assertIn("TEST-01", md)
 
 

@@ -3,14 +3,14 @@
 ```text
 PR event -> GitHub Actions (Deterministic CI Baseline)
  └── Stage 1: Engineering Quality & Security Reviewer (Scanner Reports + LLM Advisory)
-      └── HITL Gate: Sarah Chen (Tech Lead)
+      └── HITL Gate: Shahbaz / Saif (Tech Lead)
            └── Stage 2: SDET Test Planner (Categorized Test Proposals + Clarification Requests)
-                └── HITL Gate: Alex Rivera (Senior Dev)
+                └── HITL Gate: Shaheb / Tooba (Senior Dev)
                      └── CI Execution: Unit, Integration & API Tests on Candidate Commit
                           └── Stage 3: QA Director (Risk-Based Manual Matrix + Coverage Proof)
-                               └── HITL Gate: Priya Patel (QA Lead)
+                               └── HITL Gate: Siaira / Tabbasum (QA Lead)
                                     └── Stage 4: Release & CI Evidence Gate
-                                         └── HITL Gate: David Kim (Release Manager)
+                                         └── HITL Gate: Hassan / Shahbaz (Release Manager)
                                               └── Existing GitHub Protected Branch Merge Controls
 ```
 
@@ -34,7 +34,7 @@ PR event -> GitHub Actions (Deterministic CI Baseline)
 ## 2. Stage Contracts & Schemas
 
 ### Stage 1: Engineering Quality & Security Reviewer
-- **Assigned Persona:** `tech_lead` (Sarah Chen)
+- **Assigned Persona:** `tech_lead` (Shahbaz / Saif)
 - **Inputs:** PR diff metadata, changed files, and normalized deterministic scanner reports (`fixtures/sample_scanner_reports.json`).
 - **Normalized Ingestion:**
   - **Gitleaks:** Detects hardcoded credentials and sensitive tokens; automatically redacts secrets in findings.
@@ -45,7 +45,7 @@ PR event -> GitHub Actions (Deterministic CI Baseline)
 - **Policy Gate:** Automatically sets `policy_blocked: true` if unresolved Critical or High severity findings exist.
 
 ### Stage 2: SDET Test Planner
-- **Assigned Persona:** `developer` (Alex Rivera)
+- **Assigned Persona:** `developer` (Shaheb / Tooba)
 - **Inputs:** PR metadata, changed surfaces, acceptance criteria (`fixtures/sample_requirements.json`), and Stage 1 review findings.
 - **Contract:** Outputs `Stage2TestPlanArtifact` with structured `TestCaseProposal` objects categorized across:
   - `positive`: Core happy-path business scenarios.
@@ -58,14 +58,14 @@ PR event -> GitHub Actions (Deterministic CI Baseline)
 - **Safety Boundary:** All proposals carry `status: "proposed_not_executed"`. No code is written or committed.
 
 ### Stage 3: QA Director (Risk-Based Manual Test Matrix)
-- **Assigned Persona:** `qa_lead` (Priya Patel)
+- **Assigned Persona:** `qa_lead` (Siaira / Tabbasum)
 - **Inputs:** Acceptance criteria, changed components, Stage 2 test plan, Stage 1 findings, and automated test execution results (`fixtures/sample_ci_evidence.json`).
 - **Contract:** Outputs `Stage3QAPlanArtifact` with a prioritized `ManualTestMatrixRow` table.
 - **Automation Evidence Rule:** Prohibits marking scenarios covered without verified passing test reports matching the candidate commit. Unexecuted proposals are explicitly marked `"None — proposal only; no verified CI execution report"`.
 - **Ownership:** Explicitly assigns ownership across `qa_engineer_backend`, `qa_engineer_mobile`, and `qa_lead`.
 
 ### Stage 4: Release & CI Evidence Summarizer
-- **Assigned Persona:** `release_manager` (David Kim)
+- **Assigned Persona:** `release_manager` (Hassan / Shahbaz)
 - **Inputs:** Machine-readable CI test runs, security findings, QA sign-offs, and the full chain of HITL approval records.
 - **Decision Engine:**
   - `PASS`: Emitted ONLY when CI tests pass, QA sign-off is verified, zero high/critical blockers exist, all 3 upstream role approvals exist, and all evidence strictly matches `candidate_commit_sha`.
@@ -83,11 +83,11 @@ Every approval record emitted by the orchestrator conforms to the following sche
   "stage": "agent_1_review",
   "decision": "approve",
   "role": "tech_lead",
-  "approver_name": "Sarah Chen (Tech Lead)",
+  "approver_name": "Shahbaz / Saif (Tech Lead)",
   "timestamp_utc": "2026-10-21T06:32:25.850754+00:00",
   "commit_sha": "mockcommit-104-a1b2c3",
   "artifact_sha256": "7b68f38e6e3f2a92393359fd16a5436f215c51d0fe0187bd22cf9289384528fa",
-  "reason": "Verified and approved by Sarah Chen (Tech Lead) for candidate commit mockcommit-104-a1b2c3"
+  "reason": "Verified and approved by Shahbaz / Saif (Tech Lead) for candidate commit mockcommit-104-a1b2c3"
 }
 ```
 
@@ -111,9 +111,9 @@ graph LR
 
 | Environment / Target Branch | Authorized Roles | Required Gates | Automated Artifacts Triggered |
 | :--- | :--- | :--- | :--- |
-| **`dev`** (`dev`, `feature/*`) | **Tech Lead** (Sarah Chen)<br>**Senior Dev** (Alex Rivera) | 0 Critical/High scanner flaws<br>CI unit/integration tests | Scanner & Review JSON |
-| **`stage`** (`stage`, `release/*`) | **Tech Lead**<br>**Senior Dev**<br>**QA Lead** (Priya Patel) | Clean dev baseline<br>SDET test proposals reviewed<br>QA manual plan approval | **Triggers Stage APK build** for internal QA manual validation |
-| **`prod`** (`main`, `prod`) | **Tech Lead**<br>**Senior Dev**<br>**QA Lead**<br>**Release Manager** (David Kim) | 100% CI pass rate<br>Zero High/Critical flaws<br>Verified QA on Stage APK<br>Release Manager deployment auth | Release Audit Trail (`artifacts/latest_run.json`) |
+| **`dev`** (`dev`, `feature/*`) | **Tech Lead** (Shahbaz / Saif)<br>**Senior Dev** (Shaheb / Tooba) | 0 Critical/High scanner flaws<br>CI unit/integration tests | Scanner & Review JSON |
+| **`stage`** (`stage`, `release/*`) | **Tech Lead**<br>**Senior Dev**<br>**QA Lead** (Siaira / Tabbasum) | Clean dev baseline<br>SDET test proposals reviewed<br>QA manual plan approval | **Triggers Stage APK build** for internal QA manual validation |
+| **`prod`** (`main`, `prod`) | **Tech Lead**<br>**Senior Dev**<br>**QA Lead**<br>**Release Manager** (Hassan / Shahbaz) | 100% CI pass rate<br>Zero High/Critical flaws<br>Verified QA on Stage APK<br>Release Manager deployment auth | Release Audit Trail (`artifacts/latest_run.json`) |
 
 ---
 

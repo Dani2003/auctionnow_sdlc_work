@@ -78,7 +78,7 @@ def run_scenario_a():
         "commit_sha": "mockcommit-104-a1b2c3"
     }
 
-    print_step("HITL Governance Gate: Sarah Chen (Tech Lead)", "evaluating deterministic evidence...")
+    print_step("HITL Governance Gate: Shahbaz / Saif (Tech Lead)", "evaluating deterministic evidence...")
     policy = evaluate_branch_compliance(
         target_branch="dev",
         stage1=stage1,
@@ -156,9 +156,9 @@ def run_scenario_b():
         automated_tests=automated_tests
     )
 
-    print(f"    {GREEN}[PASS] Stage 1 Tech Lead (Sarah Chen):{RESET}  APPROVED")
-    print(f"    {GREEN}[PASS] Stage 2 Senior Dev (Alex Rivera):{RESET} APPROVED ({len(stage2['test_cases'])} proposals reviewed)")
-    print(f"    {GREEN}[PASS] Stage 3 QA Lead (Priya Patel):{RESET}   APPROVED (Stage APK manual matrix assigned)")
+    print(f"    {GREEN}[PASS] Stage 1 Tech Lead (Shahbaz / Saif):{RESET}  APPROVED")
+    print(f"    {GREEN}[PASS] Stage 2 Senior Dev (Shaheb / Tooba):{RESET} APPROVED ({len(stage2['test_cases'])} proposals reviewed)")
+    print(f"    {GREEN}[PASS] Stage 3 QA Lead (Siaira / Tabbasum):{RESET}   APPROVED (Stage APK manual matrix assigned)")
     print(f"    {CYAN}[STAGE-APK] Internal Stage APK v2.1.0-stage-105 build triggered for QA team{RESET}")
     print()
 
@@ -174,7 +174,7 @@ def run_scenario_b():
     )
 
     rm_approval = next(a for a in prod_policy["approvals"] if a["role"] == "release_manager")
-    print(f"    {GREEN}[PASS] Stage 4 Release Manager (David Kim):{RESET} APPROVED")
+    print(f"    {GREEN}[PASS] Stage 4 Release Manager (Hassan / Shahbaz):{RESET} APPROVED")
     print(f"    Reason: {rm_approval['reason']}")
     print(f"\n{GREEN}{BOLD}[AUTHORIZED] PROMOTION TO PRODUCTION APPROVED!{RESET}")
     print("Full cryptographic audit trail generated and bound to candidate commit.\n")
