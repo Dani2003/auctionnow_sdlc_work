@@ -1,0 +1,36 @@
+name: Agentic PR Test Generator
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches: [ dev, stage ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  generate-tests:
+    name: Generate Endpoint Test Proposals
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Runtime Dependencies
+        run: pip install httpx
+
+      - name: Execute Test Generator Agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python .github/scripts/agentic_test_generator.py

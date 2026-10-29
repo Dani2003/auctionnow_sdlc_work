@@ -157,7 +157,7 @@ class TestBranchGovernancePolicy(unittest.TestCase):
         qa_approvals = [a for a in result["approvals"] if a["role"] == "qa_lead"]
         self.assertEqual(len(qa_approvals), 1)
         self.assertEqual(qa_approvals[0]["decision"], "approve")
-        self.assertIn("Siaira / Tabbasum", qa_approvals[0]["approver_name"])
+        self.assertIn("Saira / Tabbasum", qa_approvals[0]["approver_name"])
 
     def test_prod_branch_requires_release_manager_signoff(self):
         result = evaluate_branch_compliance(

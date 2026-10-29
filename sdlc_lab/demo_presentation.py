@@ -157,8 +157,8 @@ def run_scenario_b():
     )
 
     print(f"    {GREEN}[PASS] Stage 1 Tech Lead (Shahbaz / Saif):{RESET}  APPROVED")
-    print(f"    {GREEN}[PASS] Stage 2 Senior Dev (Shaheb / Tooba):{RESET} APPROVED ({len(stage2['test_cases'])} proposals reviewed)")
-    print(f"    {GREEN}[PASS] Stage 3 QA Lead (Siaira / Tabbasum):{RESET}   APPROVED (Stage APK manual matrix assigned)")
+    print(f"    {GREEN}[PASS] Stage 2 Senior Dev (Shahzeb / Tooba):{RESET} APPROVED ({len(stage2['test_cases'])} proposals reviewed)")
+    print(f"    {GREEN}[PASS] Stage 3 QA Lead (Saira / Tabbasum):{RESET}   APPROVED (Stage APK manual matrix assigned)")
     print(f"    {CYAN}[STAGE-APK] Internal Stage APK v2.1.0-stage-105 build triggered for QA team{RESET}")
     print()
 

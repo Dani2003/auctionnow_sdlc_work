@@ -5,10 +5,10 @@ PR event -> GitHub Actions (Deterministic CI Baseline)
  └── Stage 1: Engineering Quality & Security Reviewer (Scanner Reports + LLM Advisory)
       └── HITL Gate: Shahbaz / Saif (Tech Lead)
            └── Stage 2: SDET Test Planner (Categorized Test Proposals + Clarification Requests)
-                └── HITL Gate: Shaheb / Tooba (Senior Dev)
+                └── HITL Gate: Shahzeb / Tooba (Senior Dev)
                      └── CI Execution: Unit, Integration & API Tests on Candidate Commit
                           └── Stage 3: QA Director (Risk-Based Manual Matrix + Coverage Proof)
-                               └── HITL Gate: Siaira / Tabbasum (QA Lead)
+                               └── HITL Gate: Saira / Tabbasum (QA Lead)
                                     └── Stage 4: Release & CI Evidence Gate
                                          └── HITL Gate: Hassan / Shahbaz (Release Manager)
                                               └── Existing GitHub Protected Branch Merge Controls

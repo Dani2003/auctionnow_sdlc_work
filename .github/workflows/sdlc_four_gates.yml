@@ -1,0 +1,359 @@
+name: AuctionNow SDLC Four-Gate Pipeline
+
+on:
+  pull_request:
+    branches: [ dev, stage, prod ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ prod ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+  id-token: write
+
+jobs:
+  # =========================================================================
+  # GATE 1: Deterministic Quality & Security Scan
+  # =========================================================================
+  gate-1-quality-security:
+    name: "Gate 1: Quality & Security"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      security-events: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Create Artifact Audit Directory
+        run: mkdir -p artifacts/gate-1
+
+      # 1.1 Secret Detection (Gitleaks)
+      - name: Gitleaks Secret Audit
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+          GITLEAKS_REPORT_PATH: artifacts/gate-1/gitleaks-report.json
+
+      # 1.2 Static Application Security Testing (Semgrep OSS)
+      - name: Semgrep SAST Analysis
+        run: |
+          python -m pip install --upgrade pip
+          pip install semgrep
+          semgrep scan --config auto --json --output artifacts/gate-1/semgrep-report.json || exit_code=$?
+          if [ ${exit_code:-0} -ne 0 ]; then
+            echo "::error::Semgrep discovered High/Critical security violations."
+            exit 1
+          fi
+
+      # 1.3 Open Source Vulnerabilities Audit (Google OSV-Scanner)
+      - name: Dependency Vulnerability Audit (OSV-Scanner)
+        uses: google/osv-scanner-action@v1.9.0
+        with:
+          scan-args: |-
+            --format json
+            --output artifacts/gate-1/osv-report.json
+            ./
+
+      # 1.4 AST Code Quality & Linting (Ruff)
+      - name: Ruff Code Quality & Static Analysis
+        run: |
+          pip install ruff
+          ruff check . --output-format json --output-file artifacts/gate-1/ruff-report.json
+          ruff format --check .
+
+      # 1.5 Gate Result Cryptographic Binding
+      - name: Generate Gate 1 Cryptographic Attestation
+        if: always()
+        run: |
+          python .github/scripts/artifact_signer.py \
+            --gate-id "gate-1-quality-security" \
+            --status "${{ job.status }}" \
+            --commit-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --secret "${{ secrets.GATE_SIGNING_SECRET }}" \
+            --output artifacts/gate-1/attestation.json
+
+      - name: Upload Gate 1 Attestation & Scanner Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-1-evidence
+          path: artifacts/gate-1/
+          retention-days: 14
+
+  # =========================================================================
+  # GATE 2: Test Execution & Coverage Enforcement
+  # =========================================================================
+  gate-2-test-execution:
+    name: "Gate 2: Test Execution & Coverage"
+    needs: [ gate-1-quality-security ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    env:
+      AUCTIONNOW_ENV: "local_mock"
+      AUCTIONNOW_BASE_URL: "http://127.0.0.1:8000"
+      JWT_SECRET_KEY: "ci-deterministic-test-key-for-token-generation-only"
+      COVERAGE_THRESHOLD: 80
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Download Gate 1 Attestation
+        uses: actions/download-artifact@v4
+        with:
+          name: gate-1-evidence
+          path: artifacts/gate-1
+
+      - name: Verify Gate 1 Prior Attestation
+        run: |
+          python .github/scripts/artifact_signer.py \
+            --verify \
+            --attestation artifacts/gate-1/attestation.json \
+            --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --secret "${{ secrets.GATE_SIGNING_SECRET }}"
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Testing Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f "requirements.txt" ]; then pip install -r requirements.txt; fi
+          pip install pytest pytest-cov pytest-asyncio httpx python-dotenv
+
+      - name: Execute Full Test Suite with Coverage
+        run: |
+          mkdir -p artifacts/gate-2
+          pytest tests/ \
+            --cov=app \
+            --cov-report=xml:artifacts/gate-2/coverage.xml \
+            --cov-report=term-missing \
+            --junitxml=artifacts/gate-2/junit-results.xml
+
+      - name: Enforce Minimum Coverage Threshold
+        run: |
+          coverage_pct=$(python -c "
+          import xml.etree.ElementTree as ET
+          try:
+              root = ET.parse('artifacts/gate-2/coverage.xml').getroot()
+              print(int(float(root.attrib['line-rate']) * 100))
+          except Exception:
+              print(0)
+          ")
+          echo "Current Total Line Coverage: ${coverage_pct}% (Threshold: ${COVERAGE_THRESHOLD}%)"
+          if [ "$coverage_pct" -lt "$COVERAGE_THRESHOLD" ]; then
+            echo "::error::Line coverage ${coverage_pct}% is below mandatory threshold ${COVERAGE_THRESHOLD}%"
+            exit 1
+          fi
+
+      - name: Generate Gate 2 Cryptographic Attestation
+        if: always()
+        run: |
+          python .github/scripts/artifact_signer.py \
+            --gate-id "gate-2-test-execution" \
+            --status "${{ job.status }}" \
+            --commit-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --secret "${{ secrets.GATE_SIGNING_SECRET }}" \
+            --output artifacts/gate-2/attestation.json
+
+      - name: Upload Gate 2 Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-2-evidence
+          path: artifacts/gate-2/
+          retention-days: 14
+
+  # =========================================================================
+  # GATE 3: Database Migration Safety (Stage PRs Only)
+  # =========================================================================
+  gate-3-migration-safety:
+    name: "Gate 3: Migration Safety (Neon Preview)"
+    needs: [ gate-2-test-execution ]
+    if: github.base_ref == 'stage' || github.ref == 'refs/heads/stage'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Download Prior Gate Attestations
+        uses: actions/download-artifact@v4
+        with:
+          name: gate-2-evidence
+          path: artifacts/gate-2
+
+      - name: Verify Gate 2 Attestation
+        run: |
+          python .github/scripts/artifact_signer.py \
+            --verify \
+            --attestation artifacts/gate-2/attestation.json \
+            --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --secret "${{ secrets.GATE_SIGNING_SECRET }}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Migration Tools
+        run: |
+          pip install alembic psycopg2-binary httpx python-dotenv
+
+      - name: Create Ephemeral Neon Preview Branch
+        id: neon_branch
+        run: |
+          mkdir -p artifacts/gate-3
+          response=$(curl -s -X POST "https://console.neon.tech/api/v2/projects/${{ secrets.NEON_PROJECT_ID }}/branches" \
+            -H "Authorization: Bearer ${{ secrets.NEON_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": {"name": "preview-pr-${{ github.event.pull_request.number || github.run_id }}"}}')
+          
+          branch_id=$(echo $response | jq -r '.branch.id')
+          conn_str=$(echo $response | jq -r '.connection_uris[0].connection_uri // empty')
+          
+          echo "branch_id=${branch_id}" >> $GITHUB_OUTPUT
+          echo "ephemeral_db_url=${conn_str}" >> $GITHUB_OUTPUT
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+
+      - name: Alembic Dry-Run & Destructive Operation Check
+        id: migration_audit
+        env:
+          DATABASE_URL: ${{ steps.neon_branch.outputs.ephemeral_db_url || secrets.NEON_STAGE_DB_URL }}
+        run: |
+          python .github/scripts/migration_safety_check.py \
+            --report-file artifacts/gate-3/migration-analysis.json
+
+      - name: Check for Destructive Operations & Require Review
+        run: |
+          is_destructive=$(jq -r '.has_destructive_operations' artifacts/gate-3/migration-analysis.json)
+          if [ "$is_destructive" = "true" ]; then
+            echo "::error::Destructive SQL operations detected (DROP TABLE, DROP COLUMN, TRUNCATE)."
+            echo "Alembic migrations containing destructive operations require signed override."
+            exit 1
+          fi
+
+      - name: Teardown Neon Ephemeral Branch
+        if: always()
+        run: |
+          if [ -n "${{ steps.neon_branch.outputs.branch_id }}" ]; then
+            curl -s -X DELETE "https://console.neon.tech/api/v2/projects/${{ secrets.NEON_PROJECT_ID }}/branches/${{ steps.neon_branch.outputs.branch_id }}" \
+              -H "Authorization: Bearer ${{ secrets.NEON_API_KEY }}"
+          fi
+
+      - name: Generate Gate 3 Cryptographic Attestation
+        if: always()
+        run: |
+          python .github/scripts/artifact_signer.py \
+            --gate-id "gate-3-migration-safety" \
+            --status "${{ job.status }}" \
+            --commit-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --secret "${{ secrets.GATE_SIGNING_SECRET }}" \
+            --output artifacts/gate-3/attestation.json
+
+      - name: Upload Gate 3 Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-3-evidence
+          path: artifacts/gate-3/
+          retention-days: 14
+
+  # =========================================================================
+  # GATE 4: Production Deployment (Production Branch Push Only)
+  # =========================================================================
+  gate-4-prod-deploy:
+    name: "Gate 4: Production Deployment (AWS ECS)"
+    needs: [ gate-2-test-execution ]
+    if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Verified Commit
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC Least Privilege)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Download Active ECS Task Definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ secrets.ECS_TASK_FAMILY }} \
+            --query taskDefinition > task-definition.json
+
+      - name: Update Container Image in Task Definition
+        id: update-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: auctionnow-backend
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }}
+
+      - name: Deploy Amazon ECS Service & Monitor Stability
+        id: deploy-ecs
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.update-task-def.outputs.task-definition }}
+          service: ${{ secrets.ECS_SERVICE_NAME }}
+          cluster: ${{ secrets.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      # Automated Rollback Routine
+      - name: Automated Rollback on ECS Deployment Failure
+        if: failure()
+        run: |
+          echo "::error::Deployment failed to reach stable state within 10 minutes. Triggering rollback..."
+          PREVIOUS_REVISION=$(jq -r '.taskDefinitionArn' task-definition.json)
+          aws ecs update-service \
+            --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
+            --service ${{ secrets.ECS_SERVICE_NAME }} \
+            --task-definition $PREVIOUS_REVISION \
+            --force-new-deployment

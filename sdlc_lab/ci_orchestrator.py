@@ -140,8 +140,8 @@ def generate_step_summary_md(
 
     role_map = {
         "agent_1_review": ("Tech Lead", "Shahbaz / Saif"),
-        "agent_2_test_plan": ("Senior Dev", "Shaheb / Tooba"),
-        "agent_3_qa_plan": ("QA Lead", "Siaira / Tabbasum"),
+        "agent_2_test_plan": ("Senior Dev", "Shahzeb / Tooba"),
+        "agent_3_qa_plan": ("QA Lead", "Saira / Tabbasum"),
         "agent_4_release_summary": ("Release Manager", "Hassan / Shahbaz"),
     }
 

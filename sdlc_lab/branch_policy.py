@@ -19,8 +19,8 @@ DEFAULT_POLICY_PATH = Path(__file__).resolve().parents[1] / "policies" / "branch
 # Standard HITL Role Personas for AuctionNow
 PERSONAS = {
     "tech_lead": {"name": "Shahbaz / Saif", "title": "Tech Lead / Principal Engineer"},
-    "developer": {"name": "Shaheb / Tooba", "title": "Senior Software Engineer"},
-    "qa_lead": {"name": "Siaira / Tabbasum", "title": "QA Director / Lead SDET"},
+    "developer": {"name": "Shahzeb / Tooba", "title": "Senior Software Engineer"},
+    "qa_lead": {"name": "Saira / Tabbasum", "title": "QA Director / Lead SDET"},
     "release_manager": {"name": "Hassan / Shahbaz", "title": "Release Engineering Manager"},
 }
 

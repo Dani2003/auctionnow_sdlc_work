@@ -33,8 +33,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 STAGE_ROLES = {
     "agent_1_review": {"role": "tech_lead", "default_name": "Shahbaz / Saif (Tech Lead)"},
-    "agent_2_test_plan": {"role": "developer", "default_name": "Shaheb / Tooba (Senior Dev)"},
-    "agent_3_qa_plan": {"role": "qa_lead", "default_name": "Siaira / Tabbasum (QA Lead)"},
+    "agent_2_test_plan": {"role": "developer", "default_name": "Shahzeb / Tooba (Senior Dev)"},
+    "agent_3_qa_plan": {"role": "qa_lead", "default_name": "Saira / Tabbasum (QA Lead)"},
     "agent_4_release_summary": {"role": "release_manager", "default_name": "Hassan / Shahbaz (Release Manager)"},
 }
 
