@@ -33,4 +33,5 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: python .github/scripts/agentic_test_generator.py
+        run: python scripts/agentic_test_generator.py
+

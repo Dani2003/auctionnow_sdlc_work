@@ -83,7 +83,7 @@ jobs:
       - name: Generate Gate 1 Cryptographic Attestation
         if: always()
         run: |
-          python .github/scripts/artifact_signer.py \
+          python scripts/artifact_signer.py \
             --gate-id "gate-1-quality-security" \
             --status "${{ job.status }}" \
             --commit-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
@@ -126,7 +126,7 @@ jobs:
 
       - name: Verify Gate 1 Prior Attestation
         run: |
-          python .github/scripts/artifact_signer.py \
+          python scripts/artifact_signer.py \
             --verify \
             --attestation artifacts/gate-1/attestation.json \
             --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
@@ -172,7 +172,7 @@ jobs:
       - name: Generate Gate 2 Cryptographic Attestation
         if: always()
         run: |
-          python .github/scripts/artifact_signer.py \
+          python scripts/artifact_signer.py \
             --gate-id "gate-2-test-execution" \
             --status "${{ job.status }}" \
             --commit-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
@@ -210,7 +210,7 @@ jobs:
 
       - name: Verify Gate 2 Attestation
         run: |
-          python .github/scripts/artifact_signer.py \
+          python scripts/artifact_signer.py \
             --verify \
             --attestation artifacts/gate-2/attestation.json \
             --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
@@ -249,7 +249,7 @@ jobs:
         env:
           DATABASE_URL: ${{ steps.neon_branch.outputs.ephemeral_db_url || secrets.NEON_STAGE_DB_URL }}
         run: |
-          python .github/scripts/migration_safety_check.py \
+          python scripts/migration_safety_check.py \
             --report-file artifacts/gate-3/migration-analysis.json
 
       - name: Check for Destructive Operations & Require Review
@@ -272,7 +272,7 @@ jobs:
       - name: Generate Gate 3 Cryptographic Attestation
         if: always()
         run: |
-          python .github/scripts/artifact_signer.py \
+          python scripts/artifact_signer.py \
             --gate-id "gate-3-migration-safety" \
             --status "${{ job.status }}" \
             --commit-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
@@ -357,3 +357,4 @@ jobs:
             --service ${{ secrets.ECS_SERVICE_NAME }} \
             --task-definition $PREVIOUS_REVISION \
             --force-new-deployment
+

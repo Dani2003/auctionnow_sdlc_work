@@ -34,6 +34,20 @@ ELECTRONICS_SUBS = [
 
 PROPERTIES_SUBS = ["residential", "commercial"]
 
+BIKES_SUBS = ["electric_bike", "motorbike"]
+
+BRANDS_BY_CATEGORY = {
+    "cars": [
+        "toyota", "honda", "suzuki", "hyundai", "kia", "mg", "changan", "audi", "bmw", "mercedes"
+    ],
+    "bikes": [
+        "honda", "yamaha", "suzuki", "road_prince", "united", "super_power", "yadea", "metro"
+    ],
+    "electronics": [
+        "samsung", "haier", "dawlance", "gree", "pel", "orient", "lg", "tcl", "kenwood", "panasonic"
+    ]
+}
+
 # ---------------------------------------------------------------------------
 # In-Memory Seeded State
 # ---------------------------------------------------------------------------
@@ -102,7 +116,20 @@ def reset_db():
             "buyer_id": "buyer-123",
             "title": f"Need competitive quotation for {cat}",
             "category": cat,
-            "subcategory": "tv" if cat == "electronics" else ("residential" if cat == "properties" else None),
+            "subcategory": (
+                "tv" if cat == "electronics" else (
+                    "residential" if cat == "properties" else (
+                        "motorbike" if cat == "bikes" else None
+                    )
+                )
+            ),
+            "brand": (
+                "toyota" if cat == "cars" else (
+                    "honda" if cat == "bikes" else (
+                        "samsung" if cat == "electronics" else None
+                    )
+                )
+            ),
             "city": "Lahore",
             "budget_min": 50000,
             "budget_max": 100000,
@@ -143,6 +170,7 @@ class BuyerRequestCreate(BaseModel):
     title: str = Field(..., min_length=3)
     category: str
     subcategory: Optional[str] = None
+    brand: Optional[str] = None
     city: Optional[str] = "Lahore"
     target_city: Optional[str] = "Lahore"
     description: Optional[str] = None
@@ -264,11 +292,33 @@ def get_properties_subs():
     return [{"name": s, "slug": s} for s in PROPERTIES_SUBS]
 
 
+@app.get("/categories/bikes/subcategories")
+def get_bikes_subs():
+    return [{"name": s.replace("_", " ").title(), "slug": s} for s in BIKES_SUBS]
+
+
 @app.get("/categories/{cat}")
 def get_category_by_slug(cat: str):
     if cat not in TOP_LEVEL_CATEGORIES:
         raise HTTPException(status_code=404, detail="Category not found")
     return {"slug": cat, "name": cat}
+
+
+@app.get("/categories/{cat}/brands")
+def get_category_brands(cat: str):
+    cat_norm = cat.lower()
+    if cat_norm not in TOP_LEVEL_CATEGORIES:
+        raise HTTPException(status_code=404, detail="Category not found")
+    brands = BRANDS_BY_CATEGORY.get(cat_norm, [])
+    return [{"name": b.replace("_", " ").title(), "slug": b} for b in brands]
+
+
+@app.get("/categories/bikes/{sub}")
+def get_bikes_sub(sub: str):
+    norm = sub.lower().replace(" ", "_").replace("-", "_")
+    if norm not in BIKES_SUBS:
+        raise HTTPException(status_code=404, detail="Subcategory not found")
+    return {"parent": "bikes", "slug": norm}
 
 
 @app.get("/categories/electronics/{sub}")
@@ -291,13 +341,20 @@ def get_properties_sub(sub: str):
 
 @app.get("/buyer/requests")
 @app.get("/api/v1/buyer/requests")
-def list_buyer_requests(category: Optional[str] = None, subcategory: Optional[str] = None, authorization: Optional[str] = Header(None)):
+def list_buyer_requests(
+    category: Optional[str] = None,
+    subcategory: Optional[str] = None,
+    brand: Optional[str] = None,
+    authorization: Optional[str] = Header(None)
+):
     user = parse_auth(authorization)
     results = [r for r in REQUESTS_DB.values() if r.get("status") == "open"]
     if category:
         results = [r for r in results if r.get("category") == category]
     if subcategory:
         results = [r for r in results if r.get("subcategory") == subcategory]
+    if brand:
+        results = [r for r in results if r.get("brand") == brand]
     return results
 
 
@@ -318,9 +375,20 @@ def create_buyer_request(payload: BuyerRequestCreate, authorization: Optional[st
     elif cat == "properties":
         if payload.subcategory and payload.subcategory not in PROPERTIES_SUBS:
             raise HTTPException(status_code=422, detail="Invalid properties subcategory")
+    elif cat == "bikes":
+        if payload.subcategory:
+            norm_sub = payload.subcategory.lower().replace(" ", "_").replace("-", "_")
+            if norm_sub not in BIKES_SUBS:
+                raise HTTPException(status_code=422, detail="Invalid bikes subcategory. Must be electric_bike or motorbike")
     else:
         if payload.subcategory:
             raise HTTPException(status_code=422, detail="Subcategories not permitted for this category")
+
+    if payload.brand:
+        norm_brand = payload.brand.lower().replace(" ", "_").replace("-", "_")
+        allowed_brands = [b.lower() for b in BRANDS_BY_CATEGORY.get(cat, [])]
+        if not allowed_brands or norm_brand not in allowed_brands:
+            raise HTTPException(status_code=422, detail=f"Invalid brand '{payload.brand}' for category '{cat}'")
     
     if payload.budget_min is not None and payload.budget_max is not None:
         if payload.budget_max < payload.budget_min:
@@ -336,6 +404,7 @@ def create_buyer_request(payload: BuyerRequestCreate, authorization: Optional[st
         "title": payload.title,
         "category": cat,
         "subcategory": payload.subcategory,
+        "brand": payload.brand,
         "city": payload.city or payload.target_city or "Lahore",
         "budget_min": payload.budget_min,
         "budget_max": payload.budget_max,

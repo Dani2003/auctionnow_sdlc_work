@@ -29,10 +29,15 @@ AUCTIONNOW PLATFORM SPECIFICATIONS:
 3. Top-Level Categories (Exactly 8):
    - cars, bikes, travel, umrah, electronics, laptops, mobiles, properties
 4. Subcategories:
+   - bikes (Exactly 2): electric_bike (or electric bike), motorbike
    - electronics (Exactly 8): oven, heater, water_geyser, fridge, dispenser, tv, ac, washing_machine
    - properties (Exactly 2): residential, commercial
-   - cars, bikes, travel, umrah, laptops, mobiles: No subcategories permitted (must be null/omitted).
-5. User Roles:
+   - travel, umrah, laptops, mobiles, cars: No subcategories permitted (must be null/omitted).
+5. Brands (Supported for cars, bikes, and electronics):
+   - cars: toyota, honda, suzuki, hyundai, kia, mg, changan, audi, bmw, mercedes
+   - bikes: honda, yamaha, suzuki, road_prince, united, super_power, yadea, metro
+   - electronics: samsung, haier, dawlance, gree, pel, orient, lg, tcl, kenwood, panasonic
+6. User Roles:
    - 'buyer': Can post requests, view bids on owned requests, accept bids, cancel owned requests.
    - 'seller': Can view open requests, place bids, withdraw bids. Must have `is_verified == True` to bid.
    - 'admin': Can verify/reject sellers, ban users, inspect analytics dashboard.
@@ -105,7 +110,7 @@ Cover:
 SYNTAX & FIXTURE CONSTRAINTS:
 - Use `client: httpx.Client` fixture.
 - Use token fixtures: `buyer_token`, `seller_token`, `unverified_seller_token`, `admin_token`.
-- Use headers parameter: `headers={{"Authorization": f"Bearer {{token}}"}`.
+- Use headers parameter: `headers={"Authorization": f"Bearer {{token}}"}`.
 - Return ONLY valid Python code inside triple backticks with 'python'. No prose explanations.
 """
 
@@ -211,3 +216,4 @@ The agent detected changes to **{len(routes)} endpoint(s)** and generated the fo
 
 if __name__ == "__main__":
     main()
+

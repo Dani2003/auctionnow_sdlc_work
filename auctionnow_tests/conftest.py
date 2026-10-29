@@ -31,6 +31,14 @@ ELECTRONICS_SUBCATEGORIES = [
 
 PROPERTIES_SUBCATEGORIES = ["residential", "commercial"]
 
+BIKES_SUBCATEGORIES = ["electric_bike", "motorbike"]
+
+BRANDS = {
+    "cars": ["toyota", "honda", "suzuki", "hyundai", "kia", "mg", "changan", "audi", "bmw", "mercedes"],
+    "bikes": ["honda", "yamaha", "suzuki", "road_prince", "united", "super_power", "yadea", "metro"],
+    "electronics": ["samsung", "haier", "dawlance", "gree", "pel", "orient", "lg", "tcl", "kenwood", "panasonic"]
+}
+
 # ---------------------------------------------------------------------------
 # User fixtures
 # ---------------------------------------------------------------------------

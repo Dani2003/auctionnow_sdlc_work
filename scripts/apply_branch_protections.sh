@@ -105,3 +105,4 @@ EOF
 apply_protection "prod" "$PROD_PAYLOAD"
 
 echo "Branch protection configuration successfully applied to dev, stage, and prod."
+
